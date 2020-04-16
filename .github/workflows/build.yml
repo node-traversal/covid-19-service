@@ -59,7 +59,7 @@ jobs:
           docker ps
           java -version
           ./gradlew clean build buildDocker
-          docker tag $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" 
+          docker tag $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA"
 
       # Push the Docker image to Google Container Registry
       - name: Publish
