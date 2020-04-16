@@ -59,6 +59,7 @@ jobs:
       run: |        
         docker ps
         java -version
+        ./gradlew clean build
 #       run: |  
 #         docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" \
 #           --build-arg GITHUB_SHA="$GITHUB_SHA" \
