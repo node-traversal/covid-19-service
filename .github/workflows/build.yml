@@ -41,33 +41,31 @@ jobs:
       with:       
         java-version: 11.x
 
-    # Setup gcloud CLI
-     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
        with:
-         version: '270.0.0'
-         service_account_email: ${{ secrets.GKE_EMAIL }}
-         service_account_key: ${{ secrets.GKE_KEY }}
+           version: '270.0.0'
+           service_account_email: ${{ secrets.GKE_EMAIL }}
+           service_account_key: ${{ secrets.GKE_KEY }}
 
-     # Configure docker to use the gcloud command-line tool as a credential helper
-     - name: configure
-     - run: |
-         gcloud --version
-         gcloud auth configure-docker
+    - name: configure
+      run: |
+           gcloud --version
+           gcloud auth configure-docker
       
     # Build the Docker image
     - name: Build
-      run: |        
-        docker ps
-        java -version
-        ./gradlew clean build buildDocker
-         docker -t $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" \
-           --build-arg GITHUB_SHA="$GITHUB_SHA" \
-           --build-arg GITHUB_REF="$GITHUB_REF" .
+      run: |
+           docker ps
+           java -version
+           ./gradlew clean build buildDocker
+           docker -t $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" \
+               --build-arg GITHUB_SHA="$GITHUB_SHA" \
+               --build-arg GITHUB_REF="$GITHUB_REF" .
 
     # Push the Docker image to Google Con0 tainer Registry
-     - name: Publish
+    - name: Publish
        run: |
-         docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
+           docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
         
 #     # Set up kustomize
 #     - name: Set up Kustomize
