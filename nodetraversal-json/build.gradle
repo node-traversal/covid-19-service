@@ -1,0 +1,7 @@
+ext.artifactId = 'nodetraversal-json'
+
+apply from: "${gradleScriptsDir}/standard-java.gradle"
+
+dependencies {
+    implementation group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: '2.10.3'
+}

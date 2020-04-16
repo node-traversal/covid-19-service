@@ -1,0 +1,5 @@
+subprojects {
+    group 'io.nodetraversal'
+    version = "1.0.0-SNAPSHOT"
+    ext.gradleScriptsDir = "${project.rootDir}/gradle/template"
+}
