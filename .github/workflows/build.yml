@@ -76,7 +76,9 @@ jobs:
       - name: Deploy
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
+          echo "Updating kube config"
           ./kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
+          cat primary-pod.yaml
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
