@@ -5,8 +5,8 @@ metadata:
   labels:
     app: covid
   containers:
-    name: covid-19-texas-cases-service
-    - image: gcr.io/covid-19-texas-service/covid-19-texas-cases-service@sha256:b02089fb3c9f95d047148529fa46f2d51b83f3513f1c84e007ff276c1998a364
+  - name: covid-19-texas-cases-service
+    image: gcr.io/covid-19-texas-service/covid-19-texas-cases-service@latest
   readyReplicas: 1
   replicas: 1
   updatedReplicas: 1
