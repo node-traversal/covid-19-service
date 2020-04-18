@@ -1,5 +1,5 @@
 commonLabels:
-  app: hello
+  app: covid
 
 resources:
   - deployment.yaml

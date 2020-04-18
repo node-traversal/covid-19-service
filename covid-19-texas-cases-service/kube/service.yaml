@@ -1,12 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: the-service
+  name: covid-service
 spec:
   selector:
-    deployment: hello
+    deployment: covid
   type: LoadBalancer
   ports:
     - protocol: TCP
-      port: 8666
+      port: 8080
       targetPort: 8080
