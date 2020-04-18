@@ -59,6 +59,7 @@ jobs:
           docker ps
           java -version
           ./gradlew clean build buildDocker
+          echo tagging $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA"
           docker tag $IMAGE:latest "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA"
 
       # Push the Docker image to Google Container Registry
@@ -75,6 +76,7 @@ jobs:
       # Deploy the Docker image to the GKE cluster
       - name: Deploy
         run: |
+          cd covid-19-texas-cases-service/kube
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           echo "Updating kube config"
           ./kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
