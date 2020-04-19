@@ -73,7 +73,6 @@ jobs:
           echo "deploying"
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           echo "Updating kube config"
-          ./kustomize version
           kubectl version
           sed -i s#covid-19-texas-cases-service:latest#$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}# kube/deployment.yaml
           cat kube/deployment.yaml
