@@ -21,3 +21,5 @@ export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{
 echo
 curl $MINIKUBE_URL:$NODE_PORT/hello
 kubectl exec -ti $POD_NAME curl localhost:8080
+
+kubectl version

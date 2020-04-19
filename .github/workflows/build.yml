@@ -84,6 +84,7 @@ jobs:
           echo "Updating kube config"
           sed -i s#covid-19-texas-cases-service:latest#$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}# deployment.yaml
           ./kustomize version
+          kubectl version
           ./kustomize build .
           echo; echo "applying config"
           ./kustomize build . | kubectl apply -f -
