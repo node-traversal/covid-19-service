@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
         - image: covid-19-texas-cases-service:latest
-          imagePullPolicy: Never
           name: covid-container
           ports:
             - containerPort: 8080
