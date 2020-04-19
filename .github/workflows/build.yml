@@ -82,7 +82,10 @@ jobs:
           cd covid-19-texas-cases-service/kube
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           echo "Updating kube config"
-          ./kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
+          sed s/covid-19-texas-cases-service:latest/$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}/ deployment.yaml
+          ./kustomize version
+          ./kustomize build .
+          echo; echo "applying config"
           ./kustomize build . | kubectl apply -f -
           cat deployment.yaml
           kubectl rollout status deployment/$DEPLOYMENT_NAME
