@@ -85,8 +85,6 @@ jobs:
           sed -i s#covid-19-texas-cases-service:latest#$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}# deployment.yaml
           ./kustomize version
           kubectl version
-          ./kustomize build .
-          echo; echo "applying config"
-          ./kustomize build . | kubectl apply -f -
+          kubectl apply -f kube/deployment.yaml
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
