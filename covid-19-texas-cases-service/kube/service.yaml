@@ -1,17 +1,17 @@
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
+  labels:
+    app: covid
   name: covid-service
 spec:
-  selector:
-    deployment: covid
-  type: LoadBalancer
   ports:
     - name: http
-      protocol: TCP
       port: 8080
-      targetPort: 8080
-    - name: https
       protocol: TCP
-      port: 443
-      targetPort: 9377
+      targetPort: 8080
+  selector:
+    app: covid
+    deployment: covid
+  sessionAffinity: None
+  type: LoadBalancer
