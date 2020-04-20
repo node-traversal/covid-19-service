@@ -3,7 +3,7 @@ set -x
 
 APP_NAME=covid
 SERVICE_NAME=services/$APP_NAME-service
-DEPLOYMENT_NAME=deployments/$APP_NAME-deployment
+DEPLOYMENT_NAME=deployments/$APP_NAME
 
 echo
 kubectl delete $DEPLOYMENT_NAME

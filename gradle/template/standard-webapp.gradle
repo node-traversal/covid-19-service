@@ -32,21 +32,40 @@ if (project.hasProperty('webappDebugPort')) {
     debugPort = project.getProperty('webappDebugPort')
 }
 
-task buildDocker(type:Exec) {
+task dockerBuild(type:Exec) {
     //on linux
-    commandLine 'docker', 'build', '--build-arg', "ARTIFACT_ID=${project.name}", '--build-arg', "ARTIFACT_VERSION=${project.version}",  '-t', "${project.name}", '.'
+    commandLine 'docker', 'build', '--build-arg', "ARTIFACT_ID=${project.name}", '--build-arg', "ARTIFACT_VERSION=${project.version}",  '-t', "${project.name}:latest", '.'
 }
-buildDocker.dependsOn 'build'
+dockerBuild.dependsOn 'assemble'
+build.dependsOn 'dockerBuild'
 
 // should support inputs ...
-task runDocker(type:Exec) {
+task dockerRun(type:Exec) {
     //on linux
     commandLine 'docker', 'run', '-p', "$dockerPort:8080", "${project.name}"
 }
-runDocker.dependsOn 'buildDocker'
-runDocker.doFirst {
+dockerRun.dependsOn 'dockerBuild'
+dockerRun.doFirst {
     println "Running docker on port: $dockerPort "
 }
+
+task dockerCleanContainers(type:Exec) {
+    //on linux
+    commandLine 'docker', 'container', 'prune', '-f'
+}
+clean.dependsOn 'dockerCleanContainers'
+
+task dockerCleanImage(type:Exec) {
+    //on linux
+    commandLine 'docker', 'rmi', "${project.name}:latest", '-f'
+}
+clean.dependsOn 'dockerCleanImage'
+
+task dockerCleanImages(type:Exec) {
+    //on linux
+    commandLine 'docker', 'image', 'prune', '-f'
+}
+clean.dependsOn 'dockerCleanImages'
 
 gretty {
     integrationTestTask = 'integrationTest'

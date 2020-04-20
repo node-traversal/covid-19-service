@@ -1,5 +1,4 @@
-include 'nodetraversal-json'
 include 'covid-19-webapp-common'
 include 'nodetraversal-poi'
-include 'covid-19-texas-cases-service'
+include 'covid-19-jhu-csse-service'
 
