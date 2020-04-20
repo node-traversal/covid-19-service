@@ -84,9 +84,11 @@ public class ReflectionTableParser<T> implements TableParser<T> {
         Sheet sheet = findSheet(workbook, sheetName);
 
         Row headerRow = sheet.getRow(headerRowIndex);
-        validateHeaaders(headerRow);
+        validateHeaders(headerRow);
 
-        for (int rowIndex = headerRowIndex + 1; rowIndex < sheet.getLastRowNum(); rowIndex++) {
+        int rowCount = sheet.getLastRowNum();
+
+        for (int rowIndex = headerRowIndex + 1; rowIndex < rowCount; rowIndex++) {
             T instance = readRow(sheet, rowIndex);
 
             if (instance == null) {
@@ -133,10 +135,13 @@ public class ReflectionTableParser<T> implements TableParser<T> {
         return instance;
     }
 
-    private void validateHeaaders(Row headerRow) {
-        for (int i = 0; i < Math.min(headerRow.getLastCellNum(), expectedColumns.size()); i++) {
+    private void validateHeaders(Row headerRow) {
+        int headerSize = headerRow.getLastCellNum();
+
+        for (int i = 0; i < Math.min(headerSize, expectedColumns.size()); i++) {
             String headerValue = headerRow.getCell(i).getStringCellValue();
             String expectedColumn = expectedColumns.get(i);
+
             if (!expectedColumn.equals(headerValue)) {
                 throw new IllegalArgumentException("Invalid column at index: " + i + ", expected: " + expectedColumn
                        +  ", found: " + headerValue);

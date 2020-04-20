@@ -3,9 +3,10 @@ ext.artifactId = 'covid-19-webapp-common'
 apply from: "${gradleScriptsDir}/standard-java.gradle"
 
 dependencies {
-    implementation project(':nodetraversal-json')
-
     implementation group: 'org.springframework', name: 'spring-web', version: '5.2.5.RELEASE'
+    implementation group: 'org.ehcache', name: 'ehcache', version: '3.8.1'
+    implementation group: 'javax.cache', name: 'cache-api', version: '1.0.0'
+    implementation group: 'org.springframework', name: 'spring-context-support', version: '5.2.5.RELEASE'
     implementation group: 'org.apache.cxf', name: 'cxf-rt-frontend-jaxrs', version: '3.3.6'
     implementation group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: '2.10.3'
 
