@@ -47,7 +47,7 @@ public class TimeSeriesCsvParserTest {
         Assert.assertEquals(entry.getCombinedKey(), "American Samoa, US");
         Assert.assertEquals(entry.getCounty(), "");
         Assert.assertEquals(entry.getUID(), "16");
-        Assert.assertEquals(values.get(0), Integer.valueOf(0));
+        Assert.assertEquals(values.get(0), Integer.valueOf(-1));
         Assert.assertEquals(values.get(values.size() - 1), Integer.valueOf(0));
 
         entry = series.get(10);
