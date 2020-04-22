@@ -8,6 +8,7 @@ import io.nodetraversal.covid19.jhucsse.service.model.TimeSeriesGroup;
 import io.nodetraversal.poi.ConnectionFailedException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 // PRIORITY: LOW: this data is largely more comprehensive as compared to texas gov.
 //                 ReflectionTableParser will probably be shelved ...
 public class TimeSeriesCsvParser<T extends TimeSeries> {
+
+    public static final Integer EMPTY_VALUE = -1; // consider setting to null
 
     @Getter private final String sheetName;
     @Getter private final Class<T> type;
@@ -201,11 +204,17 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
                 break;
             }
             if (cellIndex < expectedColumns.size()) {
-                addCell(instance, setters.get(cellIndex), cell);
+                addCell(row, instance, setters.get(cellIndex), cell);
                 addedCount++;
             } else {
-                values.add(Integer.valueOf(cell));
-                addedCount++;
+                if (cell == null || cell.isEmpty()) {
+                    log.info("{} had a blank value at: {}:{} in data: {}",
+                            sheetName, rowIndex, cellIndex, Arrays.toString(row));
+                    values.add(EMPTY_VALUE);
+                } else {
+                    values.add(Integer.valueOf(cell));
+                    addedCount++;
+                }
             }
         }
 
@@ -226,19 +235,29 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
     }
 
 
-    private void addCell(Object instance, Method setter, String value) {
+    private void addCell(String[] row, Object instance, Method setter, String value) {
         try {
             Class<?> setterType = setter.getParameters()[0].getType();
             if (String.class.equals(setterType)) {
                 setter.invoke(instance, value);
-            } else if (Double.class.equals(setterType)) {
-                setter.invoke(instance, Double.valueOf(value));
-            } else if (Integer.class.equals(setterType)) {
-                setter.invoke(instance, Integer.valueOf(value));
             } else if (Boolean.class.equals(setterType)) {
-                setter.invoke(instance, Boolean.valueOf(value));
+                setter.invoke(instance, BooleanUtils.toBoolean(value));
             } else if (Date.class.equals(setterType)) {
                 throw new UnsupportedOperationException("TODO");
+            } else if (Number.class.isAssignableFrom(setterType)) {
+                if (value != null && !value.isEmpty()) {
+                    if (Double.class.equals(setterType)) {
+                        setter.invoke(instance, Double.valueOf(value));
+                    } else if (Integer.class.equals(setterType)) {
+                        setter.invoke(instance, Integer.valueOf(value));
+                    } else {
+                        log.warn(instance.getClass().getSimpleName()
+                                + "." + setter.getName() + " did not support numeric type: " + setterType);
+                    }
+                } else {
+                    log.info("{} had a blank value at: {} in data: {}",
+                            sheetName, setter.getName(), Arrays.toString(row));
+                }
             } else  {
                 log.warn(instance.getClass().getSimpleName()
                         + "." + setter.getName() + " did not support: " + setterType);
