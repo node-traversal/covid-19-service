@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import io.nodetraversal.covid19.jhucsse.service.model.TimeSeriesGroup;
 import io.nodetraversal.poi.ConnectionFailedException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,10 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,12 +109,12 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
         return ImmutableMap.copyOf(methodMap);
     }
 
-    public List<T> fetch(String url) {
+    public TimeSeriesGroup<T> fetch(String url) {
         HttpEntity responseEntity = null;
 
         try (CloseableHttpClient httpclient =
                      HttpClients.custom()
-                              .build()) {
+                             .build()) {
             try (CloseableHttpResponse response = httpclient.execute(new HttpGet(url))) {
                 if (response.getStatusLine().getStatusCode() != 200) {
                     throw new ConnectionFailedException(url, response.getStatusLine().getStatusCode());
@@ -128,7 +132,7 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
             EntityUtils.consumeQuietly(responseEntity);
         }
     }
-    public List<T> parse(InputStream inputStream) throws IOException {
+    public TimeSeriesGroup<T> parse(InputStream inputStream) throws IOException {
         try {
             CSVReader csvReader = new CSVReader(new InputStreamReader(inputStream));
             List<String[]> rows = csvReader.readAll();
@@ -139,7 +143,7 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
         }
     }
 
-    public List<T> parse(List<String[]> rows) {
+    public TimeSeriesGroup<T> parse(List<String[]> rows) {
         List<T> items = new ArrayList<>();
 
         int rowCount = rows.size();
@@ -147,11 +151,14 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
 
         if (rowCount < (firstDataRow + 1)) {
             throw new IllegalArgumentException(sheetName + " does not have enough rows, "
-                + "expected: " + (firstDataRow + 1) +  ", found: " + rowCount);
+                    + "expected: " + (firstDataRow + 1) +  ", found: " + rowCount);
         }
 
+        SimpleDateFormat srcDateFormat = createDateFormat();
+        SimpleDateFormat isoDate = new SimpleDateFormat("yyyy-MM-dd");
+
         String[] headerRow = rows.get(headerRowIndex);
-        validateHeaders(headerRow);
+        List<String> dates = validateHeaders(headerRow, srcDateFormat, isoDate);
 
         for (int rowIndex = firstDataRow; rowIndex < rowCount; rowIndex++) {
             T instance = readRow(rows, rowIndex);
@@ -162,7 +169,7 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
             items.add(instance);
         }
 
-        return items;
+        return new TimeSeriesGroup<T>(dates, items);
     }
 
     public SimpleDateFormat createDateFormat() {
@@ -170,7 +177,6 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
     }
 
     private T readRow(List<String[]> rows, int rowIndex) {
-        SimpleDateFormat dateFormat = createDateFormat();
         List<Integer> values = new ArrayList<>();
 
         T instance = newInstance();
@@ -257,18 +263,38 @@ public class TimeSeriesCsvParser<T extends TimeSeries> {
         }
     }
 
-    private void validateHeaders(String[] headerRow) {
+    private Date toDate(String date, DateFormat srcDateFormat) {
+        try {
+            return srcDateFormat.parse(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    private List<String> validateHeaders(String[] headerRow, DateFormat srcDateFormat, DateFormat isoDate) {
         int headerSize = headerRow.length;
-
-        for (int i = 0; i < Math.min(headerSize, expectedColumns.size()); i++) {
+        List<String> remainingHeaders = new ArrayList<>();
+        for (int i = 0; i < Math.max(headerSize, expectedColumns.size()); i++) {
             String headerValue = headerRow[i];
-            String expectedColumn = expectedColumns.get(i);
+            if (i < expectedColumns.size()) {
+                String expectedColumn = expectedColumns.get(i);
+                if (!expectedColumn.equals(headerValue)) {
+                    throw new IllegalArgumentException("Invalid column at index: " + i + ", expected: " + expectedColumn
+                            +  ", found: " + headerValue);
+                }
+            } else {
+                Date date = toDate(headerValue, srcDateFormat);
+                if (date != null) {
+                    remainingHeaders.add(isoDate.format(date));
+                } else {
+                    throw new IllegalArgumentException("Invalid column at index: " + i + ", expected date"
+                            +  ", found: " + headerValue);
+                }
 
-            if (!expectedColumn.equals(headerValue)) {
-                throw new IllegalArgumentException("Invalid column at index: " + i + ", expected: " + expectedColumn
-                        +  ", found: " + headerValue);
             }
         }
+
+        return ImmutableList.copyOf(remainingHeaders);
     }
 
 }

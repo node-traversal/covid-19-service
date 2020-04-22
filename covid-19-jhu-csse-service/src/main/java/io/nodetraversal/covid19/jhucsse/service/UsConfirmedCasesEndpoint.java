@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import io.nodetraversal.covid19.jhucsse.service.config.Caches;
 import io.nodetraversal.covid19.jhucsse.service.csv.TimeSeriesCsvParser;
 import io.nodetraversal.covid19.jhucsse.service.model.LocationTimeSeries;
+import io.nodetraversal.covid19.jhucsse.service.model.TimeSeriesGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,9 +37,13 @@ public class UsConfirmedCasesEndpoint {
 
     @GET
     @CacheResult(cacheName = Caches.DEFAULT)
-    public List<LocationTimeSeries> get() {
+    @Path("top-ten")
+    public TimeSeriesGroup<LocationTimeSeries> get() {
         log.info("Fetching: " + US_CASES_URL);
 
-        return defaultParser.fetch(US_CASES_URL);
+        TimeSeriesGroup<LocationTimeSeries> series = defaultParser.fetch(US_CASES_URL);
+        series.getSeries().sort((o2, o1) -> o1.getLastValue().compareTo(o2.getLastValue()));
+
+        return new TimeSeriesGroup<>(series.getDates(), series.getSeries().subList(0, 10));
     }
 }

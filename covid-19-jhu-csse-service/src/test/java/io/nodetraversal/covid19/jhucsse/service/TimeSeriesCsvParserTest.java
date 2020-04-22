@@ -6,6 +6,7 @@ import com.opencsv.exceptions.CsvException;
 import io.nodetraversal.covid19.jhucsse.service.csv.TimeSeriesCsvParser;
 import io.nodetraversal.covid19.jhucsse.service.model.LocationTimeSeries;
 import io.nodetraversal.covid19.jhucsse.service.csv.TimeSeries;
+import io.nodetraversal.covid19.jhucsse.service.model.TimeSeriesGroup;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -25,7 +26,7 @@ public class TimeSeriesCsvParserTest {
             0
     );
 
-    private <T extends TimeSeries> List<T> read(String resourceName, TimeSeriesCsvParser<T> parser) {
+    private <T extends TimeSeries> TimeSeriesGroup<T> read(String resourceName, TimeSeriesCsvParser<T> parser) {
         ClassPathResource resource = new ClassPathResource(resourceName);
 
         try (InputStream inputStream = resource.getInputStream()) {
@@ -40,7 +41,11 @@ public class TimeSeriesCsvParserTest {
 
     @Test
     public void shouldReadEveryRow() {
-        List<LocationTimeSeries> series = read("cases.csv", defaultParser);
+        TimeSeriesGroup<LocationTimeSeries> group = read("cases.csv", defaultParser);
+        List<LocationTimeSeries> series = group.getSeries();
+
+        Assert.assertEquals(group.getDates().get(0), "2020-01-22");
+        Assert.assertEquals(group.getDates().get(group.getDates().size() - 1), "2020-04-18");
 
         LocationTimeSeries entry = series.get(0);
         List<Integer> values = entry.getValues();
