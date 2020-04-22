@@ -31,4 +31,8 @@ public class LocationTimeSeries implements TimeSeries {
     private String combinedKey;
 
     private List<Integer> values;
+
+    public Integer getLastValue() {
+        return values.get(values.size() - 1);
+    }
 }
