@@ -16,5 +16,5 @@ spec:
         app: "covid"
     spec:
       containers:
-        - name: "covid-19-texas-cases-service"
-          image: "covid-19-texas-cases-service:latest"
+        - name: "covid-19-jhu-csse-service"
+          image: "covid-19-jhu-csse-service:latest"

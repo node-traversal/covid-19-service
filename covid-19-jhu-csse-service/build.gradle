@@ -1,0 +1,13 @@
+ext.artifactId = 'covid-19-jhucsse-service'
+project.ext.archiveBaseName = ext.artifactId
+
+apply from: "${gradleScriptsDir}/standard-webapp.gradle"
+
+dependencies {
+    implementation project(':covid-19-webapp-common')
+    implementation project(':nodetraversal-poi')
+
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
+    implementation group: 'javax.cache', name: 'cache-api', version: '1.0.0'
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.1'
+}
