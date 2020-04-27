@@ -55,13 +55,13 @@ jobs:
 
       # Push the Docker image to Google Container Registry
       - name: Publish
-        if: github.ref == 'refs/head/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           docker push $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:$GITHUB_SHA
 
       # Deploy the Docker image to the GKE cluster
       - name: Deploy
-        if: github.ref == 'refs/head/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           echo "deploying"
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
