@@ -15,8 +15,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import java.util.List;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("time-series/us/confirmed")
@@ -37,13 +35,9 @@ public class UsConfirmedCasesEndpoint {
 
     @GET
     @CacheResult(cacheName = Caches.DEFAULT)
-    @Path("top-ten")
     public TimeSeriesGroup<LocationTimeSeries> get() {
         log.info("Fetching: " + US_CASES_URL);
 
-        TimeSeriesGroup<LocationTimeSeries> series = defaultParser.fetch(US_CASES_URL);
-        series.getSeries().sort((o2, o1) -> o1.getLastValue().compareTo(o2.getLastValue()));
-
-        return new TimeSeriesGroup<>(series.getDates(), series.getSeries().subList(0, 10));
+        return defaultParser.fetch(US_CASES_URL);
     }
 }
