@@ -45,6 +45,7 @@ jobs:
       # Build the Docker image
       - name: Build
         run: |
+          echo "${{ github.ref }}"
           docker ps
           java -version
           ./gradlew clean build
